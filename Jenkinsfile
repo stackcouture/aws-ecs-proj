@@ -58,9 +58,32 @@ pipeline {
                 }
             }
         }
+
         stage('Scan Latest Diwali Docker Image using Trivy') {
             steps {
                 sh "trivy image ${ECR_URI}:${IMAGE_TAG}"
+            }
+        }
+
+        stage('Provision ECS') {
+            steps {
+                dir("${env.TF_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        script {
+                            sh 'export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && terraform init'
+                            def planStatus = sh(
+                                script: 'terraform plan -detailed-exitcode -out=tfplan || echo $?',
+                                returnStdout: true
+                            ).trim()
+
+                            if (planStatus == '2') {
+                                sh 'terraform apply -auto-approve tfplan'
+                            } else {
+                                echo "No infrastructure changes needed."
+                            }
+                        }
+                    }
+                }
             }
         }
     }
