@@ -103,5 +103,18 @@ pipeline {
             }
         }
 
+        stage('Terraform Apply') {
+            when { expression { fileExists("${env.TF_DIR}/tfplan") } }
+            steps {
+                input message: 'Approve Terraform Apply?', ok: 'Apply'
+                dir("${env.TF_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        script {
+                            sh 'terraform apply -auto-approve tfplan'
+                        }
+                    }
+                }
+            }
+        }
     }
 }
