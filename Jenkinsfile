@@ -88,6 +88,8 @@ pipeline {
                                 returnStdout: true
                             ).trim()
 
+                            env.TF_PLAN_EXIT_CODE = planExitCode
+
                             if (planExitCode == '2') {
                                 echo "Infrastructure changes detected — saved to tfplan file."
                             } else if (planExitCode == '0') {
@@ -104,7 +106,11 @@ pipeline {
         }
 
         stage('Terraform Apply') {
-            when { expression { fileExists("${env.TF_DIR}/tfplan") } }
+            when {
+                expression {
+                    return env.TF_PLAN_EXIT_CODE == '2' && fileExists("${env.TF_DIR}/tfplan")
+                }
+            }
             steps {
                 input message: 'Approve Terraform Apply?', ok: 'Apply'
                 dir("${env.TF_DIR}") {
@@ -112,6 +118,20 @@ pipeline {
                         script {
                             sh 'terraform apply -auto-approve tfplan'
                         }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                dir("${env.TF_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        sh """
+                            export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                            terraform init
+                            terraform apply -auto-approve -var=\"container_image=${ECR_URI}:${IMAGE_TAG}\"
+                        """
                     }
                 }
             }
