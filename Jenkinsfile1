@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'ap-south-1'
+        AWS_ACCOUNT_ID     = '104824081961'
+        IMAGE_TAG          = "1.0.${BUILD_NUMBER}"
+        ECR_URI            = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/ecs-test-repo"
+        TF_DIR             = 'ecs-terraform'
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Git Checkout') {
+            steps {
+                    git branch: 'main',
+                    credentialsId: 'github-cred',
+                    url: 'https://github.com/stackcouture/aws-ecs-proj.git'
+            }
+        }
+
+        stage('Authenticate with AWS and ECR') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                    sh '''
+                        echo "Authenticating with AWS..."
+                        export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                        aws sts get-caller-identity
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                input message: 'Approve Terraform Destory?', ok: 'Apply'
+                dir("${env.TF_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        sh '''
+                            export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                            terraform init
+                            terraform destroy -auto-approve 
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}
