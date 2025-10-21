@@ -65,7 +65,7 @@ pipeline {
             }
         }
 
-        stage('Provision ECS') {
+        stage('Provision Plan') {
             steps {
                 dir("${env.TF_DIR}") {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
@@ -89,17 +89,19 @@ pipeline {
                             ).trim()
 
                             if (planExitCode == '2') {
-                                echo "Infrastructure changes detected — applying now..."
-                                sh 'terraform apply -auto-approve tfplan'
+                                echo "Infrastructure changes detected — saved to tfplan file."
                             } else if (planExitCode == '0') {
-                                echo "No infrastructure changes detected."
+                                echo "ℹNo infrastructure changes detected."
+                            } else if (planExitCode == '1') {
+                                error("Terraform plan failed — check syntax or provider credentials.")
                             } else {
-                                error("Terraform plan failed! Exit code: ${planExitCode}")
+                                echo "Unexpected exit code from Terraform plan: ${planExitCode}"
                             }
                         }
                     }
                 }
             }
         }
+
     }
 }
