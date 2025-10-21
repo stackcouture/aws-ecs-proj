@@ -70,16 +70,31 @@ pipeline {
                 dir("${env.TF_DIR}") {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
                         script {
-                            sh 'export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} && terraform init'
-                            def planStatus = sh(
-                                script: 'terraform plan -detailed-exitcode -out=tfplan || echo $?',
+                            echo "Initializing Terraform..."
+                            sh '''
+                                set -e
+                                export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                                terraform init -input=false
+                            '''
+
+                            echo "Running Terraform plan..."
+                            def planExitCode = sh(
+                                script: '''
+                                    set +e
+                                    terraform plan -input=false -no-color -detailed-exitcode -out=tfplan
+                                    exit_code=$?
+                                    echo $exit_code
+                                ''',
                                 returnStdout: true
                             ).trim()
 
-                            if (planStatus == '2') {
+                            if (planExitCode == '2') {
+                                echo "Infrastructure changes detected — applying now..."
                                 sh 'terraform apply -auto-approve tfplan'
+                            } else if (planExitCode == '0') {
+                                echo "No infrastructure changes detected."
                             } else {
-                                echo "No infrastructure changes needed."
+                                error("Terraform plan failed! Exit code: ${planExitCode}")
                             }
                         }
                     }
