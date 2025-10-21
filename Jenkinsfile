@@ -19,7 +19,7 @@ pipeline {
         stage('Git Checkout') {
             steps {
                     git branch: 'main',
-                    credentialsId: 'github-token',
+                    credentialsId: 'github-cred',
                     url: 'https://github.com/stackcouture/aws-ecs-proj.git'
             }
         }
