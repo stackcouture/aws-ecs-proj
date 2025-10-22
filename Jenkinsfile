@@ -17,6 +17,7 @@ pipeline {
     }
 
     stages {
+
         stage('Clean Workspace') {
             steps {
                 cleanWs()
@@ -88,7 +89,37 @@ pipeline {
             }
         }
 
-    }
+        stage('Provision Plan') {
+            steps {
+                script {
+                    terraformProvisionPlan("${env.TF_DIR}", 'aws-credentials-id', "${env.AWS_DEFAULT_REGION}")
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression {
+                    return env.TF_PLAN_EXIT_CODE == '2' && fileExists("${env.TF_DIR}/tfplan")
+                }
+            }
+            steps {
+                script {
+                    input message: 'Approve Terraform Apply?', ok: 'Apply'
+                    terraformApply("${env.TF_DIR}", 'aws-credentials-id')
+                }
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                script {
+                    deployToECS("${env.TF_DIR}", 'aws-credentials-id', "${env.AWS_DEFAULT_REGION}", "${env.ECR_URI}", "${env.IMAGE_TAG}")
+                }
+            }
+        }
+
+    }   
 
     post {
         always {
