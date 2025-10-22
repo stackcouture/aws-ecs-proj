@@ -3,10 +3,6 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
-        AWS_ACCOUNT_ID     = '104824081961'
-        IMAGE_TAG          = "1.0.${BUILD_NUMBER}"
-        ECR_URI            = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/ecs-test-repo"
-        TF_DIR             = 'ecs-terraform'
     }
 
     stages {
