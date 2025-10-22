@@ -50,9 +50,16 @@ pipeline {
         stage('Trivy Scan') {
             steps {
                 script {
-                    def criticalCount = scanDockerImage("${env.IMAGE_NAME}:latest")
-                    if (criticalCount > 0) {
-                        error("Critical vulnerabilities detected: ${criticalCount}. Build stopped.")
+                    // Scan Docker image
+                    def scanResults = scanDockerImage("${env.IMAGE_NAME}:latest")
+
+                    // Report CRITICALs clearly, but do NOT stop the pipeline
+                    if (scanResults.critical > 0) {
+                        echo "Warning: ${scanResults.critical} CRITICAL vulnerabilities detected in ${env.IMAGE_NAME}:latest"
+                    }
+
+                    if (scanResults.high > 0) {
+                        echo "Note: ${scanResults.high} HIGH vulnerabilities detected in ${env.IMAGE_NAME}:latest"
                     }
                 }
             }

@@ -9,22 +9,41 @@ def call(String imageRef) {
 
         echo "Scanning Docker image ${imageRef} with Trivy..."
 
+        # Generate text report
         trivy image --exit-code 0 -f table -o ${textReport} ${imageRef}
         cat ${textReport}
 
+        # Generate HTML report
         trivy image --exit-code 0 -f template -o ${htmlReport} --template "@contrib/html.tpl" ${imageRef}
     """
 
+    // Archive the reports
     archiveArtifacts artifacts: "${textReport}, ${htmlReport}", allowEmptyArchive: true
 
+    // Count CRITICAL vulnerabilities
     def critCount = sh(
         script: "grep -c 'CRITICAL' ${textReport} || true",
         returnStdout: true
     ).trim()
 
-    echo "Image ${imageRef} has ${critCount} CRITICAL vulnerabilities."
+    // Count HIGH vulnerabilities
+    def highCount = sh(
+        script: "grep -c 'HIGH' ${textReport} || true",
+        returnStdout: true
+    ).trim()
 
-    // DO NOT stop the pipeline
-    // return the number for reporting or optional warnings
-    return critCount.isInteger() ? critCount.toInteger() : 0
+    // Print summary
+    echo "======================================="
+    echo "Trivy Scan Summary for ${imageRef}:"
+    echo "CRITICAL vulnerabilities: ${critCount}"
+    echo "HIGH vulnerabilities: ${highCount}"
+    echo "Text report: ${textReport}"
+    echo "HTML report: ${htmlReport}"
+    echo "======================================="
+
+    // Return a map for reporting
+    return [
+        critical: critCount.isInteger() ? critCount.toInteger() : 0,
+        high: highCount.isInteger() ? highCount.toInteger() : 0
+    ]
 }
