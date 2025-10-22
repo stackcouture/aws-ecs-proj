@@ -1,5 +1,5 @@
 def call(String imageName, String imageTag, String awsAccountId, String awsRegion) {
-    env.ECR_URI = "${awsAccountId}.dkr.ecr.${awsRegion}.amazonaws.com/${imageName}"
+    env.ECR_URI = "${awsAccountId}.dkr.ecr.${awsRegion}.amazonaws.com/ecs-test-repo"
 
     dir(imageName) {
         sh """
