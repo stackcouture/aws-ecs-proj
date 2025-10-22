@@ -113,52 +113,6 @@ pipeline {
                 )
             }
         }
-
-        // stage('Provision ECS') {
-        //     steps {
-        //         dir("${env.TF_DIR}") {
-        //             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
-        //                 script {
-        //                     // Initialize Terraform
-        //                     sh "export AWS_DEFAULT_REGION=${params.AWS_DEFAULT_REGION} && terraform init"
-
-        //                     // Run Terraform plan with detailed-exitcode
-        //                     def planStatus = sh(
-        //                         script: 'terraform plan -detailed-exitcode -out=tfplan || echo $?',
-        //                         returnStdout: true
-        //                     ).trim()
-
-        //                     // Only apply if changes exist (exit code 2)
-        //                     if (planStatus == '2') {
-        //                         echo "Terraform plan shows changes. Applying..."
-        //                         sh 'terraform apply -auto-approve tfplan'
-        //                     } else {
-        //                         echo "No infrastructure changes needed."
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Deploy to ECS') {
-        //     steps {
-        //         dir("${env.TF_DIR}") {
-        //             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
-        //                 script {
-        //                     // Deploy ECS task with updated container image
-        //                     def fullImage = "${ECR_URI}:${IMAGE_TAG}"
-        //                     sh """
-        //                         export AWS_DEFAULT_REGION=${params.AWS_DEFAULT_REGION}
-        //                         terraform init
-        //                         terraform apply -auto-approve -var="container_image=${fullImage}"
-        //                     """
-        //                     echo "ECS deployment triggered with image: ${fullImage}"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }   
 
     post {

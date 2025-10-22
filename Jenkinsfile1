@@ -26,7 +26,7 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
                     sh '''
                         echo "Authenticating with AWS..."
-                        export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                        export AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}
                         aws sts get-caller-identity
                     '''
                 }
@@ -39,13 +39,20 @@ pipeline {
                 dir("${env.TF_DIR}") {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
                         sh '''
-                            export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+                            export AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}
                             terraform init
                             terraform destroy -auto-approve 
                         '''
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up workspace after destroy..."
+            cleanWs()
         }
     }
 }
