@@ -56,5 +56,25 @@ pipeline {
                 }
             }
         }
+
+        stage('Scan Docker Image with Snyk') {
+            steps {
+                script {
+                    snykDockerScan(
+                        ecrUri: "${env.ECR_URI}",
+                        imageTag: "${IMAGE_TAG}",
+                        credentialsId: 'SNYK_TOKEN' 
+                    )
+                }
+            }
+        }
+
+        // stage('Snyk Scan Docker Image') {
+        //     steps {
+        //         script {
+        //             snykDockerScan(env.ECR_URI, IMAGE_TAG)
+        //         }
+        //     }
+        // }
     }
 }
