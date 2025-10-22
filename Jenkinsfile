@@ -72,7 +72,8 @@ pipeline {
                         env.IMAGE_NAME,
                         env.IMAGE_TAG,
                         params.AWS_ACCOUNT_ID,
-                        params.AWS_DEFAULT_REGION
+                        params.AWS_DEFAULT_REGION,
+                        env.AWS_CREDENTIALS_ID
                     )
                     echo "Docker image pushed to ECR: ${env.ECR_URI}"
                 }

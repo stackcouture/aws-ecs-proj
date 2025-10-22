@@ -1,12 +1,18 @@
-def call(String imageName, String imageTag, String awsAccountId, String region) {
+def call(String imageName, String imageTag, String awsAccountId, String region, String credentialsId) {
     def ecrUri = "${awsAccountId}.dkr.ecr.${region}.amazonaws.com/ecs-test-repo"
 
-    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-        echo "Logging in to AWS ECR..."
+    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: credentialsId]]) {
         sh """
-            aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${awsAccountId}.dkr.ecr.${region}.amazonaws.com
-        """
 
+            export AWS_DEFAULT_REGION=${region}
+            aws sts get-caller-identity
+
+            echo "Logging into ECR..."
+            aws ecr get-login-password --region ${region} | \\
+            docker login --username AWS --password-stdin ${awsAccountId}.dkr.ecr.${region}.amazonaws.com
+
+        """
+        
         echo "Tagging images..."
         sh """
             docker tag ${imageName}:latest ${ecrUri}:${imageTag} || echo "Failed to tag ${imageName}:${imageTag}"
