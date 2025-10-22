@@ -1,5 +1,7 @@
 def call(String imageName) {
-    dir(imageName) {
-        sh "docker build --no-cache -t ${imageName}:latest ."
-    }
+    echo "Building Docker image: ${imageName}:latest"
+    sh """
+        docker build -t ${imageName}:latest .
+    """
+    return "${imageName}:latest"
 }

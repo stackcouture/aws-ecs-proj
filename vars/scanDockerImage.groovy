@@ -1,9 +1,8 @@
 def call(String imageRef) {
-
     def safeTag = imageRef.replaceAll(':','-')
     def textReport = "trivy-scan-${safeTag}.txt"
     def htmlReport = "trivy-scan-${safeTag}.html"
-    
+
     sh """
         mkdir -p contrib
         curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
@@ -18,12 +17,10 @@ def call(String imageRef) {
 
     archiveArtifacts artifacts: "${textReport}, ${htmlReport}", allowEmptyArchive: true
 
-    def critCount = sh(script: "grep -c 'CRITICAL' ${textReport} || true", returnStdout: true).trim()
+    def critCount = sh(
+        script: "grep -c 'CRITICAL' ${textReport} || true",
+        returnStdout: true
+    ).trim()
 
-    if (critCount.isInteger() && critCount.toInteger() > 0) {
-        echo "Found ${critCount} CRITICAL vulnerabilities in ${imageRef}! Failing the build."
-        error("Critical vulnerabilities detected in image ${imageRef}. Build stopped.")
-    } else {
-        echo "No critical vulnerabilities found. Safe to push to ECR."
-    }
+    return critCount.isInteger() ? critCount.toInteger() : 0
 }

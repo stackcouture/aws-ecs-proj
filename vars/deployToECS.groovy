@@ -1,14 +1,11 @@
 def call(String tfDir, String awsCredsId, String region, String ecrUri, String imageTag) {
     dir(tfDir) {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCredsId]]) {
-            echo "Deploying ECS service using Terraform..."
             sh """
-                set -e
                 export AWS_DEFAULT_REGION=${region}
-                terraform init -input=false
-                terraform apply -auto-approve -var="container_image=${ecrUri}:${imageTag}"
+                terraform apply -auto-approve -var "image_uri=${ecrUri}" -var "image_tag=${imageTag}"
             """
-            echo "ECS Deployment completed — Service updated with ${ecrUri}:${imageTag}"
+            echo "Deployment to ECS triggered via Terraform."
         }
     }
 }

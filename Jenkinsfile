@@ -47,20 +47,18 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan (Pre-Push)') {
+        stage('Trivy Scan') {
             steps {
                 script {
-                    scanDockerImage("${env.IMAGE_NAME}:latest")
+                    def criticalCount = scanDockerImage("${env.IMAGE_NAME}:latest")
+                    if (criticalCount > 0) {
+                        error("Critical vulnerabilities detected: ${criticalCount}. Build stopped.")
+                    }
                 }
             }
         }
 
         stage('Push Docker Image to AWS ECR') {
-            when {
-                expression {
-                    currentBuild.currentResult == 'SUCCESS'
-                }
-            }
             steps {
                 script {
                     env.ECR_URI = pushImageECR(
@@ -73,12 +71,7 @@ pipeline {
             }
         }
 
-        stage('Scan Docker Image with Snyk') {
-            when {
-                expression {
-                    currentBuild.currentResult == 'SUCCESS'
-                }
-            }
+        stage('Snyk Container Scan') {
             steps {
                 script {
                     snykDockerScan(
@@ -90,23 +83,29 @@ pipeline {
             }
         }
 
-        stage('Terraform Plan & Apply') {
+        stage('Terraform Plan') {
             steps {
                 script {
-                    // Run Terraform Plan and get exit code
-                    def tfPlanExitCode = terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
-
-                    // Conditionally apply if changes exist
-                    if (tfPlanExitCode == '2' && fileExists("${env.TF_DIR}/tfplan")) {
-                        input message: 'Infrastructure changes detected. Approve Terraform Apply?', ok: 'Apply'
-                        terraformApply(env.TF_DIR, env.AWS_CREDENTIALS_ID)
-                    } else {
-                        echo "No Terraform changes detected. Skipping apply."
-                    }
+                    def planExitCode = terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
+                    echo "Terraform plan exit code: ${planExitCode}"
                 }
             }
         }
 
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    // Apply only if changes exist (exit code 2) and plan file exists
+                    def planExitCode = terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
+                    if (planExitCode == 2 && fileExists("${env.TF_DIR}/tfplan")) {
+                        input message: 'Terraform plan shows changes. Approve Apply?', ok: 'Apply'
+                        terraformApply(env.TF_DIR, env.AWS_CREDENTIALS_ID)
+                    } else {
+                        echo "No changes detected. Skipping Terraform apply."
+                    }
+                }
+            }
+        }
 
         stage('Deploy to ECS') {
             steps {
@@ -115,7 +114,6 @@ pipeline {
                 }
             }
         }
-
     }   
 
     post {
