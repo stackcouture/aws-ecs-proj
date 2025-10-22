@@ -1,10 +1,6 @@
-FROM alpine:3.22.2
+FROM nginx:1.26.2-alpine
 
-RUN apk update && apk upgrade --no-cache \
-    && apk add --no-cache nginx pcre2=10.46-r0 \
-    && rm -rf /var/cache/apk/*
-
-COPY . /usr/share/nginx/html
+COPY index.html style.css script.js diwali3d.js /usr/share/nginx/html/
 
 EXPOSE 80
 
