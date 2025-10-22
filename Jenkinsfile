@@ -35,5 +35,18 @@ pipeline {
                 }
             }
         }
+
+        stage('Build, Tag & Push app Docker Image to AWS ECR') {
+            steps {
+                 script {
+                    buildAndPushDocker(
+                        'diwali-wishes',          
+                        IMAGE_TAG,                
+                        params.AWS_ACCOUNT_ID,    
+                        params.AWS_DEFAULT_REGION 
+                    )
+                }
+            }
+        }
     }
 }
