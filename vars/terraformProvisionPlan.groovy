@@ -20,17 +20,14 @@ def call(String tfDir, String awsCredsId, String region) {
             ).trim()
 
             echo "Terraform plan exit code: ${planExitCode}"
-            env.TF_PLAN_EXIT_CODE = planExitCode
 
-            if (planExitCode == '2') {
-                echo "Infrastructure changes detected — saved to tfplan file."
-            } else if (planExitCode == '0') {
-                echo "No infrastructure changes detected."
-            } else if (planExitCode == '1') {
+            if (planExitCode == '1') {
                 error("Terraform plan failed — check syntax or provider credentials.")
-            } else {
-                echo "Unexpected exit code from Terraform plan: ${planExitCode}"
+            } else if (planExitCode != '0' && planExitCode != '2') {
+                echo "⚠ Unexpected exit code from Terraform plan: ${planExitCode}"
             }
+
+            return planExitCode
         }
     }
 }

@@ -90,38 +90,28 @@ pipeline {
             }
         }
 
-        stage('Terraform Plan') {
+        stage('Terraform Plan & Apply') {
             steps {
                 script {
-                    terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
+                    // Run Terraform Plan and get exit code
+                    def tfPlanExitCode = terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
+
+                    // Conditionally apply if changes exist
+                    if (tfPlanExitCode == '2' && fileExists("${env.TF_DIR}/tfplan")) {
+                        input message: 'Infrastructure changes detected. Approve Terraform Apply?', ok: 'Apply'
+                        terraformApply(env.TF_DIR, env.AWS_CREDENTIALS_ID)
+                    } else {
+                        echo "No Terraform changes detected. Skipping apply."
+                    }
                 }
             }
         }
 
-        stage('Terraform Apply') {
-            when {
-                expression { env.TF_PLAN_EXIT_CODE == '2' && fileExists("${env.TF_DIR}/tfplan") }
-            }
-            steps {
-                script {
-                    input message: 'Approve Terraform Apply?', ok: 'Apply'
-                    terraformApply(env.TF_DIR, env.AWS_CREDENTIALS_ID)
-                }
-            }
-        }
 
         stage('Deploy to ECS') {
             steps {
                 script {
                     deployToECS(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION, env.ECR_URI, env.IMAGE_TAG)
-                }
-            }
-        }
-
-        stage('Post-Deployment Validation') {
-            steps {
-                script {
-                    echo "Deployment completed. You can optionally add ECS service/task validation here."
                 }
             }
         }
