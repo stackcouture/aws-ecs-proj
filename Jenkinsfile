@@ -4,6 +4,7 @@ pipeline {
     agent any
 
     environment {
+        IMAGE_NAME        = 'diwali-wishes'
         IMAGE_TAG          = "1.0.${BUILD_NUMBER}"
         GIT_URL            = "https://github.com/stackcouture/aws-ecs-proj.git"
         TF_DIR             = 'ecs-terraform'
@@ -39,7 +40,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                  script {
-                    buildDockerImage('diwali-wishes')
+                    buildDockerImage("${IMAGE_NAME}")
                 }
             }
         }
@@ -47,24 +48,21 @@ pipeline {
         stage('Trivy Scan (Pre-Push)') {
             steps {
                 script {
-                    scanDockerImage("diwali-wishes:latest")
+                    scanDockerImage("${IMAGE_NAME}:latest")
                 }
             }
         }
 
-        // stage('Scan Latest Docker Image') {
-        //     steps {
-        //         script {
-        //             scanDockerImage(env.ECR_URI, IMAGE_TAG)
-        //         }
-        //     }
-        // }
-
         stage('Push Docker Image to AWS ECR') {
+            when {
+                expression {
+                    currentBuild.currentResult == 'SUCCESS'
+                }
+            }
             steps {
                 script {
                     env.ECR_URI = pushImageECR(
-                        'diwali-wishes',
+                        "${IMAGE_NAME}",
                         IMAGE_TAG,
                         params.AWS_ACCOUNT_ID,
                         params.AWS_DEFAULT_REGION
@@ -74,6 +72,11 @@ pipeline {
         }
 
         stage('Scan Docker Image with Snyk') {
+            when {
+                expression {
+                    currentBuild.currentResult == 'SUCCESS'
+                }
+            }
             steps {
                 script {
                     snykDockerScan(
@@ -85,5 +88,11 @@ pipeline {
             }
         }
 
+    }
+
+    post {
+        always {
+            echo "Build completed with result: ${currentBuild.currentResult}"
+        }
     }
 }

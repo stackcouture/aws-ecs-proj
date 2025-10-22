@@ -4,28 +4,25 @@ def call(String imageRef) {
     def textReport = "trivy-scan-${safeTag}.txt"
     def htmlReport = "trivy-scan-${safeTag}.html"
     
-    try {
-        sh """
-            mkdir -p contrib
-            curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
+    sh """
+        mkdir -p contrib
+        curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o contrib/html.tpl
 
-            echo "Scanning Docker image ${imageRef} with Trivy..."
+        echo "Scanning Docker image ${imageRef} with Trivy..."
 
-            trivy image -f table -o ${textReport} ${imageRef}
-            cat ${textReport}
+        trivy image --exit-code 0 -f table -o ${textReport} ${imageRef}
+        cat ${textReport}
 
-            trivy image -f template -o ${htmlReport} --template "@contrib/html.tpl" ${imageRef}
+        trivy image --exit-code 0 -f template -o ${htmlReport} --template "@contrib/html.tpl" ${imageRef}
 
-            
-            if grep -q "CRITICAL" ${textReport}; then
-                echo "Critical vulnerabilities detected in ${imageRef}! Failing the build."
-                exit 1
-            fi
-        """
-    } catch (Exception e) {
-        echo "Trivy scan failed: ${e.getMessage()}"
-        currentBuild.result = 'UNSTABLE'
-    }
+        CRIT_COUNT=\$(grep -c "CRITICAL" ${textReport} || true)
+        if [ "\$CRIT_COUNT" -gt 0 ]; then
+            echo "Found \$CRIT_COUNT CRITICAL vulnerabilities in ${imageRef}! Build will fail."
+            exit 1
+        else
+            echo "No critical vulnerabilities found. Safe to push."
+        fi
+    """
 
     archiveArtifacts artifacts: "${textReport}, ${htmlReport}", onlyIfSuccessful: true
 }
