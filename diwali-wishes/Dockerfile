@@ -1,8 +1,11 @@
-# Use a lightweight web server image
-FROM nginx:alpine
+FROM alpine:3.22.2
 
-# Copy static site files to nginx html directory
+RUN apk update && apk upgrade --no-cache \
+    && apk add --no-cache nginx pcre2=10.46-r0 \
+    && rm -rf /var/cache/apk/*
+
 COPY . /usr/share/nginx/html
 
-# Expose port 80
 EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
