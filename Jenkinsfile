@@ -36,23 +36,44 @@ pipeline {
             }
         }
 
-        stage('Build, Tag & Push app Docker Image to AWS ECR') {
+        stage('Build Docker Image') {
             steps {
                  script {
-                    env.ECR_URI = buildAndPushDocker(
-                        'diwali-wishes',          
-                        IMAGE_TAG,                
-                        params.AWS_ACCOUNT_ID,    
-                        params.AWS_DEFAULT_REGION 
-                    )
+                    buildDockerImage('diwali-wishes')
                 }
             }
         }
 
-        stage('Scan Latest Docker Image') {
+        stage('Trivy Scan (Pre-Push)') {
             steps {
                 script {
-                    scanDockerImage(env.ECR_URI, IMAGE_TAG)
+                    def localImage = "diwali-wishes:${IMAGE_TAG}"
+                    try {
+                        scanDockerImage(localImage, IMAGE_TAG) // This should fail the build if critical found
+                    } catch (Exception e) {
+                        error("Trivy scan failed: ${e.getMessage()}. Blocking build due to critical vulnerabilities.")
+                    }
+                }
+            }
+        }
+
+        // stage('Scan Latest Docker Image') {
+        //     steps {
+        //         script {
+        //             scanDockerImage(env.ECR_URI, IMAGE_TAG)
+        //         }
+        //     }
+        // }
+
+        stage('Push Docker Image to AWS ECR') {
+            steps {
+                script {
+                    env.ECR_URI = pushImageECR(
+                        'diwali-wishes',
+                        IMAGE_TAG,
+                        params.AWS_ACCOUNT_ID,
+                        params.AWS_DEFAULT_REGION
+                    )
                 }
             }
         }
@@ -69,12 +90,5 @@ pipeline {
             }
         }
 
-        // stage('Snyk Scan Docker Image') {
-        //     steps {
-        //         script {
-        //             snykDockerScan(env.ECR_URI, IMAGE_TAG)
-        //         }
-        //     }
-        // }
     }
 }

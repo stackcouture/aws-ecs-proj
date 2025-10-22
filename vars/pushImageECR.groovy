@@ -4,8 +4,7 @@ def call(String imageName, String imageTag, String awsAccountId, String awsRegio
     dir(imageName) {
         sh """
             echo "Building Docker image..."
-            docker build -t ${imageName}:latest .
-
+ 
             echo "Tagging image with ${imageTag} and latest..."
             docker tag ${imageName}:latest ${ECR_URI}:${imageTag}
             docker tag ${imageName}:latest ${ECR_URI}:latest
