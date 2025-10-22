@@ -92,25 +92,28 @@ pipeline {
             }
         }
 
-        stage('Terraform Plan') {
+        stage('Provision ECS') {
             steps {
-                script {
-                    def planExitCode = terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
-                    echo "Terraform plan exit code: ${planExitCode}"
-                }
-            }
-        }
+                dir("${env.TF_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        script {
+                            // Initialize Terraform
+                            sh "export AWS_DEFAULT_REGION=${params.AWS_DEFAULT_REGION} && terraform init"
 
-        stage('Terraform Apply') {
-            steps {
-                script {
-                    // Apply only if changes exist (exit code 2) and plan file exists
-                    def planExitCode = terraformProvisionPlan(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION)
-                    if (planExitCode == 2 && fileExists("${env.TF_DIR}/tfplan")) {
-                        input message: 'Terraform plan shows changes. Approve Apply?', ok: 'Apply'
-                        terraformApply(env.TF_DIR, env.AWS_CREDENTIALS_ID)
-                    } else {
-                        echo "No changes detected. Skipping Terraform apply."
+                            // Run Terraform plan with detailed-exitcode
+                            def planStatus = sh(
+                                script: 'terraform plan -detailed-exitcode -out=tfplan || echo $?',
+                                returnStdout: true
+                            ).trim()
+
+                            // Only apply if changes exist (exit code 2)
+                            if (planStatus == '2') {
+                                echo "Terraform plan shows changes. Applying..."
+                                sh 'terraform apply -auto-approve tfplan'
+                            } else {
+                                echo "No infrastructure changes needed."
+                            }
+                        }
                     }
                 }
             }
@@ -118,11 +121,30 @@ pipeline {
 
         stage('Deploy to ECS') {
             steps {
-                script {
-                    deployToECS(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION, env.ECR_URI, env.IMAGE_TAG)
+                dir("${env.TF_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                        script {
+                            // Deploy ECS task with updated container image
+                            def fullImage = "${ECR_URI}:${IMAGE_TAG}"
+                            sh """
+                                export AWS_DEFAULT_REGION=${params.AWS_DEFAULT_REGION}
+                                terraform init
+                                terraform apply -auto-approve -var="container_image=${fullImage}"
+                            """
+                            echo "ECS deployment triggered with image: ${fullImage}"
+                        }
+                    }
                 }
             }
         }
+
+        // stage('Deploy to ECS') {
+        //     steps {
+        //         script {
+        //             deployToECS(env.TF_DIR, env.AWS_CREDENTIALS_ID, params.AWS_DEFAULT_REGION, env.ECR_URI, env.IMAGE_TAG)
+        //         }
+        //     }
+        // }
     }   
 
     post {
