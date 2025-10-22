@@ -47,12 +47,7 @@ pipeline {
         stage('Trivy Scan (Pre-Push)') {
             steps {
                 script {
-                    def localImage = "diwali-wishes:${IMAGE_TAG}"
-                    try {
-                        scanDockerImage(localImage, IMAGE_TAG) // This should fail the build if critical found
-                    } catch (Exception e) {
-                        error("Trivy scan failed: ${e.getMessage()}. Blocking build due to critical vulnerabilities.")
-                    }
+                    scanDockerImage("diwali-wishes:latest")
                 }
             }
         }
