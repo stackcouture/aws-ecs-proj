@@ -39,12 +39,20 @@ pipeline {
         stage('Build, Tag & Push app Docker Image to AWS ECR') {
             steps {
                  script {
-                    buildAndPushDocker(
+                    env.ECR_URI = buildAndPushDocker(
                         'diwali-wishes',          
                         IMAGE_TAG,                
                         params.AWS_ACCOUNT_ID,    
                         params.AWS_DEFAULT_REGION 
                     )
+                }
+            }
+        }
+
+        stage('Scan Latest Docker Image') {
+            steps {
+                script {
+                    scanDockerImage(env.ECR_URI, IMAGE_TAG)
                 }
             }
         }

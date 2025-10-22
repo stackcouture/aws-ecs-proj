@@ -15,4 +15,6 @@ def call(String imageName, String imageTag, String awsAccountId, String awsRegio
             docker push ${ECR_URI}:latest
         """
     }
+
+    return ecrUri
 }
