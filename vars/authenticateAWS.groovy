@@ -1,4 +1,4 @@
-def authenticateAWS(String awsRegion, String awsAccountId, String credentialsId) {
+def call(String awsRegion, String awsAccountId, String credentialsId) {
     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: credentialsId]]) {
         sh """
             echo "Authenticating with AWS..."
