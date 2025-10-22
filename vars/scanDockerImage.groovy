@@ -14,15 +14,16 @@ def call(String imageRef) {
         cat ${textReport}
 
         trivy image --exit-code 0 -f template -o ${htmlReport} --template "@contrib/html.tpl" ${imageRef}
-
-        CRIT_COUNT=\$(grep -c "CRITICAL" ${textReport} || true)
-        if [ "\$CRIT_COUNT" -gt 0 ]; then
-            echo "Found \$CRIT_COUNT CRITICAL vulnerabilities in ${imageRef}! Build will fail."
-            exit 1
-        else
-            echo "No critical vulnerabilities found. Safe to push."
-        fi
     """
 
-    archiveArtifacts artifacts: "${textReport}, ${htmlReport}", onlyIfSuccessful: true
+    archiveArtifacts artifacts: "${textReport}, ${htmlReport}", allowEmptyArchive: true
+
+    def critCount = sh(script: "grep -c 'CRITICAL' ${textReport} || true", returnStdout: true).trim()
+
+    if (critCount.isInteger() && critCount.toInteger() > 0) {
+        echo "Found ${critCount} CRITICAL vulnerabilities in ${imageRef}! Failing the build."
+        error("Critical vulnerabilities detected in image ${imageRef}. Build stopped.")
+    } else {
+        echo "No critical vulnerabilities found. Safe to push to ECR."
+    }
 }
