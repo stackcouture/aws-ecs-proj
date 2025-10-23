@@ -1,14 +1,15 @@
 def call(Map config = [:]) {
-    // Input approval message
     input message: config.approvalMessage ?: 'Approve Terraform Destroy?', ok: 'Destroy'
 
-    // Navigate to Terraform folder
-    dir(config.tfDir ?: 'ecs-terraform') {
-        // Authenticate with AWS using credentials
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: config.awsCred ?: 'aws-credentials-id']]) {
+    def tfDir = config.tfDir ?: 'ecs-terraform'
+    dir(tfDir) {
+        def awsCred = config.awsCred ?: 'aws-credentials-id'
+        def awsRegion = config.awsRegion ?: 'ap-south-1'
+
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: awsCred]]) {
             sh """
                 echo "Authenticating with AWS..."
-                export AWS_DEFAULT_REGION=${config.awsRegion ?: 'ap-south-1'}
+                export AWS_DEFAULT_REGION=${awsRegion}
                 aws sts get-caller-identity
 
                 echo "Initializing Terraform..."

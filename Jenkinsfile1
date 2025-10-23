@@ -6,7 +6,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '30')) 
         disableConcurrentBuilds() 
-        wsCleanup() 
+        ws(cleanWhenSuccess: true, cleanWhenFailure: true)
     }
 
     environment {
