@@ -1,7 +1,5 @@
 
-## Install Trivy
-
-Install the trivy on jenkins machine with following the steps 
+## Install the trivy on jenkins machine with following the steps 
 ---
 ```bash 
 sudo apt-get install wget apt-transport-https gnupg lsb-release
