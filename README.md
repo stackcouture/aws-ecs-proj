@@ -77,3 +77,22 @@ The goal of this project is to:
 - Container vulnerability scanning using **Trivy** and **Snyk**
 
 ---
+
+### Contributing
+
+Contributions to this **festive DevOps project** are welcome! You can help improve the project by enhancing CI/CD, security, or documentation.
+
+---
+### Areas to Contribute
+- Add **new CI/CD pipeline stages** or improve existing Jenkins shared library functions.
+- Integrate additional **container security scans** (e.g., trivy, snyk).
+- Extend **monitoring dashboards** for ECS, ALB, Docker, or application metrics.
+- Optimize **Terraform modules** for reusability and efficiency.
+
+💡 **Tip:** Keep the focus on **automation, DevOps best practices, and containerized deployments**, while maintaining the festive spirit of the Diwali website.
+
+---
+### License
+
+This project is licensed under the **MIT License** – feel free to use, adapt, or extend it for your organization or personal learning.
+---
