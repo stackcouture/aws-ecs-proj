@@ -23,11 +23,11 @@ The goal of this project is to:
 - Application Load Balancer (ALB)
 
 **Tools & Technologies:**
-- Jenkins, Docker, Trivy, Terraform, GitHub
-- GitHub Shared Libraries for CI/CD automation
+- Jenkins, Docker, Trivy, Terraform, Snyk, GitHub
+- Jenkins Shared Libraries for CI/CD automation
 
 **Programming / Markup:**
-- HTML5, CSS3, JavaScript, Three.js
+- HTML5, CSS3, JavaScript
 
 ---
 
@@ -35,7 +35,7 @@ The goal of this project is to:
 
 #### 1️⃣ EC2 Setup
 - Ubuntu EC2 instance
-- Install Jenkins, Docker, Trivy, Terraform
+- Install Jenkins, Docker, Trivy, Snyk, Terraform
 
 #### 2️⃣ CI/CD Pipeline
 - Jenkins pipeline pulls source code from GitHub
@@ -51,7 +51,7 @@ The goal of this project is to:
 
 #### 4️⃣ Deployment
 - Jenkins deploys the latest Docker image to ECS
-- Automatic deployment across dev/test/prod environments via shared library functions
+- Automatic deployment via shared library functions
 
 ---
 
