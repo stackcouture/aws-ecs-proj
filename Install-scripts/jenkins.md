@@ -71,8 +71,6 @@ Install the following plugins in Jenkins to support CI/CD pipelines, Docker, and
 
 Follow these steps to create and use a shared library in Jenkins.
 
----
-
 ### 1️⃣ Prepare the Shared Library Repository
 
 Create a Git repository to host your shared library. Example:
@@ -80,12 +78,13 @@ Create a Git repository to host your shared library. Example:
 jenkins-shared-library
 
 **Repository Structure:**
-
+```bash 
 (root)
 ├── vars/
 │ └── myFunction.groovy # callable in Jenkinsfile as "myFunction()"
 
 > `vars/` – scripts that can be called directly in Jenkinsfiles.
+```
 
 ### 2️⃣ Add the Library to Jenkins
 
