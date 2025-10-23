@@ -94,5 +94,6 @@ Contributions to this **festive DevOps project** are welcome! You can help impro
 ---
 ### License
 
-This project is licensed under the **MIT License** – feel free to use, adapt, or extend it for your organization or personal learning.
+- This project is licensed under the **MIT License** – feel free to use, adapt, or extend it for   
+  your organization or personal learning.
 ---
