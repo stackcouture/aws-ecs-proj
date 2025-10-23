@@ -1,10 +1,10 @@
-# 🎆 Static Diwali Wishes Website - AWS ECS Deployment
+## Static Diwali Wishes Website - AWS ECS Deployment
 
 This project is a **festive DevOps exercise** — a static Diwali wishes website deployed on **AWS ECS** with a complete **CI/CD pipeline** using **Jenkins** and **Terraform**.
 
 ---
 
-## 📌 Project Overview
+### Project Overview
 
 The goal of this project is to:
 
@@ -15,7 +15,7 @@ The goal of this project is to:
 
 ---
 
-## 🛠 Tech Stack
+### Tech Stack
 
 **AWS Services:**
 - EC2, ECS, ECR
@@ -31,31 +31,31 @@ The goal of this project is to:
 
 ---
 
-## ⚙️ Architecture
+### Architecture
 
-### 1️⃣ EC2 Setup
+#### 1️⃣ EC2 Setup
 - Ubuntu EC2 instance
 - Install Jenkins, Docker, Trivy, Terraform
 
-### 2️⃣ CI/CD Pipeline
+#### 2️⃣ CI/CD Pipeline
 - Jenkins pipeline pulls source code from GitHub
 - Authenticates with AWS and builds Docker image
 - Pushes Docker image to **AWS ECR**
 - Runs **Trivy & Snyk scans** for container security
 
-### 3️⃣ Infrastructure Provisioning (Terraform)
+#### 3️⃣ Infrastructure Provisioning (Terraform)
 - VPC with public subnets
 - Internet Gateway & Route Tables
 - ALB & Target Groups
 - ECS Cluster and Task Definitions
 
-### 4️⃣ Deployment
+#### 4️⃣ Deployment
 - Jenkins deploys the latest Docker image to ECS
 - Automatic deployment across dev/test/prod environments via shared library functions
 
 ---
 
-## 🚀 Jenkins Pipeline Highlights
+### Jenkins Pipeline Highlights
 
 - `@Library('my-shared-lib') _` for reusable CI/CD functions
 - Environment variables: `IMAGE_NAME`, `IMAGE_TAG`, `TF_DIR`, `AWS_CREDENTIALS_ID`
@@ -72,7 +72,7 @@ The goal of this project is to:
 
 ---
 
-## 🔒 Security
+### Security
 
 - Container vulnerability scanning using **Trivy** and **Snyk**
 
