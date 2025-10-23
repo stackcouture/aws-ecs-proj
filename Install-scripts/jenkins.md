@@ -1,90 +1,112 @@
-1. Install Jenkins 
+## Jenkins Installation & Shared Library Setup Guide
 
-   sudo apt update -y
+This guide walks you through installing Jenkins on Ubuntu, setting up essential plugins, and configuring a **Jenkins Shared Library** for reusable pipeline code.
+
+---
+
+### 1️⃣ Install Jenkins
+
+Update packages and install dependencies:
+
+```bash
+sudo apt update -y
 sudo apt install fontconfig openjdk-21-jre -y
-
 sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
   https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
-  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-  /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] \
+https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
 sudo apt update -y
 sudo apt install jenkins -y
+```
 
+### 2️⃣ Enable and Start Jenkins
+
+```bash
 sudo systemctl enable jenkins
 sudo systemctl start jenkins
-sudo systemctl status jenkins
-
-echo "✅ Checking Jenkins status..."
 sudo systemctl status jenkins --no-pager
+```
 
-echo "🌐 Configuring firewall (Allow port 8080)..."
+### 3️⃣ Configure Firewall
+```bash
 sudo ufw allow 8080/tcp
 sudo ufw enable -y
 sudo ufw status
+```
 
-echo "🔑 Retrieving Jenkins admin password..."
+### 4️⃣ Retrieve Initial Admin Password
+```bash
 JENKINS_PASSWORD=$(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)
+echo "🔑 Jenkins Initial Admin Password: $JENKINS_PASSWORD"
 
-echo "🎉 Jenkins installed successfully!"
-echo "🔗 Access Jenkins at: http://$(curl -s ifconfig.me):8080"
-echo "🛠 Initial Admin Password: $JENKINS_PASSWORD"
-echo "💡 Save this password to log in for the first time."
+Access Jenkins at:
+http://<EC2_Public_IP>:8080
+```
 
-echo "✅ Done!"
-Connect to Jenkins using <EC2_Public_IP:8080>
+---
 
-Install the Below plugins 
+## Install Required Jenkins Plugins
 
-Amazon ECR plugin
-AWS Credentials Plugin
-Build With Parameters
-Docker API Plugin
-Docker Pipeline
-Docker plugin
-Git plugin
-Groovy
-HTML Publisher plugin
-Pipeline Graph View Plugin
-Pipeline: Groovy
-SSH Build Agents plugin
-Workspace Cleanup Plugin
+Install the following plugins in Jenkins to support CI/CD pipelines, Docker, and AWS integration:
 
+- Amazon ECR Plugin
+- AWS Credentials Plugin
+- Build With Parameters
+- Docker API Plugin
+- Docker Pipeline
+- Docker Plugin
+- Git Plugin
+- Groovy
+- HTML Publisher Plugin
+- Pipeline Graph View Plugin
+- Pipeline: Groovy
+- SSH Build Agents Plugin
+- Workspace Cleanup Plugin
 
-1️⃣ Prepare the Shared Library Repository
+---
 
-Create a Git repository to host your shared library. For example:
+## Jenkins Shared Library Setup
+
+Follow these steps to create and use a shared library in Jenkins.
+
+---
+
+### 1️⃣ Prepare the Shared Library Repository
+
+Create a Git repository to host your shared library. Example:
 
 jenkins-shared-library
 
-
-Structure the repository like this:
+**Repository Structure:**
 
 (root)
 ├── vars/
-│   └── myFunction.groovy        # callable in Jenkinsfile as "myFunction()"
+│ └── myFunction.groovy # callable in Jenkinsfile as "myFunction()"
 
+> `vars/` – scripts that can be called directly in Jenkinsfiles.
 
-vars/ – scripts that can be called directly in Jenkinsfiles.
+### 2️⃣ Add the Library to Jenkins
 
-2️⃣ Add the Library to Jenkins
-Open Jenkins → Manage Jenkins → Configure System
-Scroll down to Global Pipeline Libraries
-Click Add:
-Name: my-shared-lib (this is used in Jenkinsfile)
-Default version: branch name (e.g., main)
-Retrieval method: Modern SCM → Git
-Project Repository: https://github.com/your-org/jenkins-shared-library.git
-Optional: Credentials if private repo
-Save the configuration.
+1. Open **Jenkins → Manage Jenkins → Configure System**  
+2. Scroll down to **Global Pipeline Libraries**  
+3. Click **Add** and configure:  
+   - **Name:** `my-shared-lib` (used in Jenkinsfile)  
+   - **Default version:** branch name (e.g., `main`)  
+   - **Retrieval method:** Modern SCM → Git  
+   - **Project Repository:** `https://github.com/your-org/jenkins-shared-library.git`  
+   - **Credentials:** Optional, if the repo is private  
+4. Click **Save**
 
-3️⃣ Use the Shared Library in a Jenkinsfile
+### 3️⃣ Use the Shared Library in a Jenkinsfile
+
 At the top of your Jenkinsfile, import the library:
 
+```groovy
 @Library('my-shared-lib') _
-
-
 Call a function defined in vars/myFunction.groovy:
+
 
 pipeline {
     agent any
@@ -98,10 +120,10 @@ pipeline {
         }
     }
 }
-
-4️⃣ Example vars/myFunction.groovy
+```
+### 4️⃣ Example vars/myFunction.groovy
+```groovy
 def call(String message) {
     echo "Shared Library says: ${message}"
 }
-
-
+```
