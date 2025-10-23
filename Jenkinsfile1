@@ -1,58 +1,44 @@
+@Library('my-shared-lib') _
+
 pipeline {
     agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '30')) 
+        disableConcurrentBuilds() 
+        wsCleanup() 
+    }
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
         TF_DIR             = 'ecs-terraform'
+        GIT_URL            = "https://github.com/stackcouture/aws-ecs-proj.git"
+        GIT_BRANCH         = 'main'
     }
 
     stages {
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
 
         stage('Git Checkout') {
             steps {
-                    git branch: 'main',
-                    credentialsId: 'github-cred',
-                    url: 'https://github.com/stackcouture/aws-ecs-proj.git'
+                    checkoutGit(env.GIT_BRANCH, env.GIT_URL, 'github-cred')
             }
         }
 
-        stage('Authenticate with AWS and ECR') {
+        stage('Terraform Destroy') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
-                    sh '''
-                        echo "Authenticating with AWS..."
-                        export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-                        aws sts get-caller-identity
-                    '''
-                }
-            }
-        }
-
-        stage('Terraform Apply') {
-            steps {
-                input message: 'Approve Terraform Destory?', ok: 'Apply'
-                dir("${env.TF_DIR}") {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
-                        sh '''
-                            export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-                            terraform init
-                            terraform destroy -auto-approve 
-                        '''
-                    }
-                }
+                terraformDestroy(
+                    tfDir: env.TF_DIR,
+                    awsCred: 'aws-credentials-id',
+                    awsRegion: env.AWS_DEFAULT_REGION,
+                    approvalMessage: 'Approve Terraform destroy for ECS resources?'
+                )
             }
         }
     }
 
     post {
         always {
-            echo "Cleaning up workspace after destroy..."
-            cleanWs()
+            cleanupWorkspace(tfDir: env.TF_DIR)
         }
     }
 }
