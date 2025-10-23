@@ -46,9 +46,11 @@ aws sts get-caller-identity
 
 For temporary sessions or CI/CD pipelines, you can export AWS credentials as environment variables:
 
+```bash
 export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxx
 export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 export AWS_DEFAULT_REGION=ap-south-1
+```
 
 
 ### 5️⃣ Add AWS Credentials in Jenkins
