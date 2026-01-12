@@ -1,4 +1,4 @@
-FROM nginx:1.26.2-alpine
+FROM nginx:1.29.4-alpine
 
 COPY index.html style.css script.js diwali3d.js /usr/share/nginx/html/
 
