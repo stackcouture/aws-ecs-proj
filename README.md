@@ -25,6 +25,23 @@ The infrastructure is designed to be **modular**, **scalable**, and **reproducib
 - 📈 Production-ready, repeatable deployment workflow
 
 ---
+## 📑 Table of Contents
+- [🏗️ Architecture](#architecture)
+- [🛠️ Tech Stack](#️-tech-stack)
+  - [☁️ AWS Services](#️-aws-services)
+  - [⚙️ DevOps & DevSecOps Tools](#️-devops--devsecops-tools)
+  - [💻 Programming & Web Technologies](#-programming--web-technologies)
+  - [🏗️ Architecture Components](#️-architecture-components)
+- [🔄 Jenkins Pipeline](#-jenkins-pipeline)
+  - [📌 Pipeline Highlights](#-pipeline-highlights)
+  - [🌍 Environment Variables](#-environment-variables)
+  - [🚀 Pipeline Stages](#-pipeline-stages)
+  - [🔁 Pipeline Workflow](#-pipeline-workflow)
+- [🔒 Security](#security)
+- [🤝 Contributing](#contributing)
+  - [Areas to Contribute](#areas-to-contribute)
+- [📄 License](#license)
+---
 ## Architecture
 
 ![Project Overview](docs/images/ecs_deployment.png "Architecture")
@@ -157,13 +174,11 @@ Jenkins Pipeline
 ```
 
 ---
-
 ### Security
 
 - Container vulnerability scanning using **Trivy** and **Snyk**
 
 ---
-
 ### Contributing
 
 Contributions to this **festive DevOps project** are welcome! You can help improve the project by enhancing CI/CD, security, or documentation.
