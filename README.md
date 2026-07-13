@@ -31,60 +31,130 @@ The infrastructure is designed to be **modular**, **scalable**, and **reproducib
 
 
 ---
-### Tech Stack
+## 🛠️ Tech Stack
 
-**AWS Services:**
-- EC2, ECS, ECR
-- VPC, Subnets, Internet Gateway, Route Tables
-- Application Load Balancer (ALB)
+### ☁️ AWS Services
 
-**Tools & Technologies:**
-- Jenkins, Docker, Trivy, Terraform, Snyk, GitHub
-- Jenkins Shared Libraries for CI/CD automation
-
-**Programming / Markup:**
-- HTML5, CSS3, JavaScript
-
----
-
-### Architecture
-
-#### 1️⃣ EC2 Setup
-- Ubuntu EC2 instance
-- Install Jenkins, Docker, Trivy, Snyk, Terraform
-
-#### 2️⃣ CI/CD Pipeline
-- Jenkins pipeline pulls source code from GitHub
-- Authenticates with AWS and builds Docker image
-- Pushes Docker image to **AWS ECR**
-- Runs **Trivy & Snyk scans** for container security
-
-#### 3️⃣ Infrastructure Provisioning (Terraform)
-- VPC with public subnets
-- Internet Gateway & Route Tables
-- ALB & Target Groups
-- ECS Cluster and Task Definitions
-
-#### 4️⃣ Deployment
-- Jenkins deploys the latest Docker image to ECS
-- Automatic deployment via shared library functions
+| Service | Purpose |
+|----------|---------|
+| **Amazon EC2** | Hosts the Jenkins server used for CI/CD automation |
+| **Amazon ECS** | Runs the containerized application using ECS Services |
+| **Amazon ECR** | Stores and manages Docker container images |
+| **Amazon VPC** | Provides isolated networking for the infrastructure |
+| **Public & Private Subnets** | Segregates application and infrastructure components |
+| **Internet Gateway** | Enables internet connectivity for public resources |
+| **Route Tables** | Controls network traffic routing within the VPC |
+| **Application Load Balancer (ALB)** | Distributes incoming traffic across ECS tasks |
+| **IAM** | Manages secure authentication and authorization for AWS resources |
 
 ---
+### ⚙️ DevOps & DevSecOps Tools
 
-### Jenkins Pipeline Highlights
+| Tool | Purpose |
+|------|---------|
+| **Jenkins** | Continuous Integration and Continuous Deployment (CI/CD) |
+| **Jenkins Shared Libraries** | Reusable and standardized pipeline automation |
+| **Docker** | Containerizes the application for consistent deployments |
+| **Terraform** | Infrastructure as Code (IaC) provisioning |
+| **Trivy** | Container image vulnerability scanning |
+| **Snyk** | Security analysis and dependency vulnerability scanning |
+| **Git & GitHub** | Source code management and version control |
 
-- `@Library('my-shared-lib') _` for reusable CI/CD functions
-- Environment variables: `IMAGE_NAME`, `IMAGE_TAG`, `TF_DIR`, `AWS_CREDENTIALS_ID`
-- Stages:
-  1. Clean Workspace
-  2. Git Checkout
-  3. AWS Authentication
-  4. Build Docker Image
-  5. Trivy Scan
-  6. Push Docker Image to ECR
-  7. Snyk Container Scan
-  8. Provision ECS (Terraform)
-  9. Deploy to ECS
+---
+### 💻 Programming & Web Technologies
+
+| Technology | Purpose |
+|------------|---------|
+| **HTML5** | Application frontend structure |
+| **CSS3** | Styling and responsive UI |
+| **JavaScript** | Client-side application logic |
+
+---
+### 🏗️ Architecture Components
+
+- ☁️ Amazon ECS
+- 📦 Amazon ECR
+- 🖥️ Amazon EC2
+- 🌐 Application Load Balancer (ALB)
+- 🔐 IAM
+- 🌍 Amazon VPC
+- 🛣️ Route Tables
+- 🔗 Internet Gateway
+- 🐳 Docker
+- ⚙️ Jenkins
+- 📚 Jenkins Shared Libraries
+- 🏗️ Terraform
+- 🔍 Trivy
+- 🛡️ Snyk
+- 🐙 GitHub
+
+---
+## 🔄 Jenkins Pipeline
+
+The CI/CD pipeline is implemented using **Jenkins Declarative Pipeline** and leverages **Jenkins Shared Libraries** to promote reusable, standardized, and maintainable pipeline code. The pipeline automates the complete application delivery lifecycle—from source code checkout and security validation to infrastructure provisioning and deployment on **Amazon ECS**.
+
+### 📌 Pipeline Highlights
+- Uses **Jenkins Shared Libraries** (`@Library('my-shared-lib') _`) for reusable CI/CD functions.
+- Centralized environment variables for improved maintainability and consistency.
+- Automatically authenticates with AWS using Jenkins credentials.
+- Builds and tags Docker images for deployment.
+- Performs container vulnerability scanning with **Trivy**.
+- Pushes validated container images to **Amazon ECR**.
+- Executes an additional container security assessment using **Snyk**.
+- Provisions or updates AWS infrastructure using **Terraform**.
+- Deploys the latest application version to **Amazon ECS**.
+- Provides a fully automated, secure, and repeatable deployment workflow.
+
+---
+### 🌍 Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `IMAGE_NAME` | Docker image repository name |
+| `IMAGE_TAG` | Docker image version/tag used for deployment |
+| `TF_DIR` | Terraform working directory |
+| `AWS_CREDENTIALS_ID` | Jenkins AWS credentials used for authentication |
+
+---
+### 🚀 Pipeline Stages
+
+| Stage | Description |
+|--------|-------------|
+| **1. Clean Workspace** | Removes files from previous builds to ensure a clean execution environment. |
+| **2. Git Checkout** | Retrieves the latest source code from the GitHub repository. |
+| **3. AWS Authentication** | Authenticates with AWS using securely stored Jenkins credentials. |
+| **4. Build Docker Image** | Builds the application into a Docker container image. |
+| **5. Trivy Security Scan** | Scans the Docker image for operating system and application vulnerabilities. |
+| **6. Push Image to Amazon ECR** | Pushes the verified Docker image to Amazon Elastic Container Registry. |
+| **7. Snyk Container Scan** | Performs an additional security scan for known vulnerabilities and best practices. |
+| **8. Terraform Provisioning** | Creates or updates AWS infrastructure required for the ECS application. |
+| **9. Deploy to Amazon ECS** | Updates the ECS service with the latest container image and deploys the application. |
+
+---
+### 🔁 Pipeline Workflow
+
+```text
+GitHub Repository
+        │
+        ▼
+Jenkins Pipeline
+        │
+        ├── Clean Workspace
+        ├── Git Checkout
+        ├── AWS Authentication
+        ├── Build Docker Image
+        ├── Trivy Scan
+        ├── Push Image to Amazon ECR
+        ├── Snyk Container Scan
+        ├── Terraform Provisioning
+        └── Deploy to Amazon ECS
+                 │
+                 ▼
+        Application Load Balancer
+                 │
+                 ▼
+              End Users
+```
 
 ---
 
