@@ -1,20 +1,36 @@
-## Static Diwali Wishes Website - AWS ECS Deployment
+## 📖 Project Overview
 
-This project is a **festive DevOps exercise** — a static Diwali wishes website deployed on **AWS ECS** with a complete **CI/CD pipeline** using **Jenkins** and **Terraform**.
+This project demonstrates a complete **AWS ECS DevSecOps CI/CD pipeline** that automates the build, security scanning, infrastructure provisioning, and deployment of a containerized web application on **Amazon ECS**.
 
----
+The solution follows **Infrastructure as Code (IaC)** principles using **Terraform** and implements **DevSecOps** best practices by integrating automated container vulnerability scanning into the CI/CD pipeline.
 
-### Project Overview
+The **Jenkins pipeline** automatically checks out the source code from GitHub, builds a Docker image, performs security scans using **Trivy** and **Snyk**, pushes the verified image to **Amazon ECR**, provisions or updates AWS infrastructure using **Terraform**, and deploys the latest application version to **Amazon ECS** behind an **Application Load Balancer (ALB)**. This provides a fully automated, repeatable, secure, and production-ready deployment workflow.
 
-The goal of this project is to:
-
-- Build a **static HTML5, CSS3, JavaScript, and Three.js Diwali wishes website**.
-- Deploy it securely and automatically on **AWS ECS**.
-- Provision infrastructure using **Terraform (IaC)**.
-- Implement CI/CD and container security with **Jenkins, Docker, Trivy, and Snyk**.
+The infrastructure is designed to be **modular**, **scalable**, and **reproducible**, provisioning networking components, ECS resources, IAM roles, security groups, Amazon ECR repositories, and load balancing through Terraform. By combining CI/CD automation, container security, and Infrastructure as Code, this project demonstrates how production-grade containerized applications can be deployed consistently on AWS with minimal manual intervention.
 
 ---
+### 🚀 Key Highlights
 
+- ⚙️ Automated CI/CD pipeline using **Jenkins**
+- 🐳 Containerized application with **Docker**
+- ☁️ Infrastructure provisioning using **Terraform**
+- 📦 Container image storage with **Amazon ECR**
+- 🚀 Application deployment on **Amazon ECS**
+- 🌐 Load balancing with **Application Load Balancer (ALB)**
+- 🔒 Automated container vulnerability scanning using **Trivy**
+- 🛡️ Security analysis using **Snyk**
+- 🔑 Secure AWS authentication with **IAM Roles & Policies**
+- 🔄 End-to-end deployment automation from **code commit to production**
+- 📁 Modular Infrastructure as Code (IaC) architecture
+- 📈 Production-ready, repeatable deployment workflow
+
+---
+## Architecture
+
+![Project Overview](docs/images/ecs_deployment.png "Architecture")
+
+
+---
 ### Tech Stack
 
 **AWS Services:**
